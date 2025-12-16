@@ -1,0 +1,67 @@
+{
+  "Comment": "Invoice approval workflow",
+  "StartAt": "ValidateInvoice",
+  "States": {
+    "ValidateInvoice": {
+      "Type": "Task",
+      "Resource": "${ValidateInvoiceFunctionArn}",
+      "Next": "ApprovalDecision",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "SendNotification"
+        }
+      ]
+    },
+
+    "ApprovalDecision": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.isValid",
+          "BooleanEquals": true,
+          "Next": "ApproveInvoice"
+        }
+      ],
+      "Default": "RejectInvoice"
+    },
+
+    "ApproveInvoice": {
+      "Type": "Task",
+      "Resource": "${ApproveInvoiceFunctionArn}",
+      "Next": "SendNotification",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "SendNotification"
+        }
+      ]
+    },
+
+    "RejectInvoice": {
+      "Type": "Task",
+      "Resource": "${RejectInvoiceFunctionArn}",
+      "Next": "SendNotification",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "SendNotification"
+        }
+      ]
+    },
+
+    "SendNotification": {
+      "Type": "Task",
+      "Resource": "${SendNotificationFunctionArn}",
+      "End": true,
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ]
+    }
+  }
+}

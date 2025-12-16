@@ -1,0 +1,11 @@
+{
+  "Comment": "Simple workflow calling Lambda function",
+  "StartAt": "HelloLambda",
+  "States": {
+    "HelloLambda": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:FUNCTION_NAME",
+      "End": true
+    }
+  }
+}
